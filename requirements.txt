@@ -1,0 +1,5 @@
+pyaudio
+openai-whisper
+groq
+requests
+playsound==1.2.2
