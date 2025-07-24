@@ -1,30 +1,20 @@
 # tts.py
 
-import requests
-import uuid
-from config import TTSMAKER_API_URL, TTSMAKER_VOICE
+from gtts import gTTS
 from playsound import playsound
+import os
+import uuid
+from config import LANG
 
 def text_to_speech(text):
-    print("🔊 Converting to speech...")
+    print("🔊 Converting to speech (gTTS)...")
+    tts = gTTS(text=text, lang=LANG)
     filename = f"output_{uuid.uuid4().hex[:6]}.mp3"
-
-    payload = {
-        "text": text,
-        "voice": TTSMAKER_VOICE,
-        "output_format": "mp3",
-        "speed": 1,
-        "pitch": 1
-    }
-
-    response = requests.post(TTSMAKER_API_URL, json=payload)
-    response.raise_for_status()
-    audio_url = response.json().get("audio_url")
-
-    if audio_url:
-        audio = requests.get(audio_url)
-        with open(filename, "wb") as f:
-            f.write(audio.content)
+    try:
+        tts.save(filename)
         playsound(filename)
-    else:
-        print("❌ Failed to get audio URL.")
+    except Exception as e:
+        print("❌ gTTS or playback error:", e)
+    finally:
+        if os.path.exists(filename):
+            os.remove(filename)
